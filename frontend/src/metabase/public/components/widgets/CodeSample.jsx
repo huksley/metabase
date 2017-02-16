@@ -9,10 +9,18 @@ import AceEditor from "metabase/components/TextEditor";
 
 import _ from "underscore";
 
+type CodeSampleOption = {
+    name: string,
+    value: string,
+    source: () => string,
+    mode: string
+};
+
 type Props = {
     className?: string,
     title?: string,
-    options?: Array<{ name: string, value: string, source: () => string, mode: string }>
+    options?: Array<CodeSampleOption>,
+    onChangeOption: (option: ?CodeSampleOption) => void
 };
 
 type State = {
@@ -29,11 +37,11 @@ export default class CodeSample extends Component<*, Props, State> {
         };
     }
 
-    setOption(name) {
+    setOption(name: string) {
         this.setState({ name })
     }
 
-    handleChange(name) {
+    handleChange(name: string) {
         const { options, onChangeOption } = this.props;
         this.setState({ name });
         if (onChangeOption) {

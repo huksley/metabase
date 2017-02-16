@@ -35,8 +35,8 @@
   (let [unsigned-token   (check-and-unsign token)
         card-id          (eu/get-in-unsigned-token-or-throw unsigned-token [:resource :question])
         token-params     (eu/get-in-unsigned-token-or-throw unsigned-token [:params])
-        ;; TODO - enforce params whitelist, passed as :_embedding_params
-        parameter-values (merge query-params token-params)
+        embedding-params (eu/get-in-unsigned-token-or-throw unsigned-token [:_embedding_params])
+        parameter-values (embed-api/validate-params embedding-params token-params query-params)
         parameters       (embed-api/apply-parameter-values (embed-api/resolve-card-parameters card-id) parameter-values)]
     (public-api/run-query-for-card-with-id card-id parameters)))
 
@@ -56,9 +56,9 @@
   (let [unsigned-token   (check-and-unsign token)
         dashboard-id     (eu/get-in-unsigned-token-or-throw unsigned-token [:resource :dashboard])
         token-params     (eu/get-in-unsigned-token-or-throw unsigned-token [:params])
-        parameter-values (merge query-params token-params)
+        embedding-params (eu/get-in-unsigned-token-or-throw unsigned-token [:_embedding_params])
+        parameter-values (embed-api/validate-params embedding-params token-params query-params)
         parameters       (embed-api/apply-parameter-values (embed-api/resolve-dashboard-parameters dashboard-id dashcard-id card-id) parameter-values)]
-    ;; TODO - enforce params whitelist for dashboard
     (public-api/public-dashcard-results dashboard-id card-id parameters)))
 
 

@@ -31,6 +31,8 @@ type Props = {
 }
 
 export default class EmbedCodePane extends Component<*, Props, *> {
+    _embedSample: ?CodeSample;
+
     render() {
         const { className, embedType, iframeUrl, siteUrl, secretKey, resource, resourceType, params, displayOptions } = this.props;
         return (
