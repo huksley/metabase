@@ -7,14 +7,15 @@ export const getPublicEmbedOptions = ({ iframeUrl }) => [
 
 export const getSignedEmbedOptions = () => [
     { name: "HTML (Mustache)", source: () => html({ iframeUrl: `"{{iframeUrl}}"`, mode: "ace/mode/html" })},
+    { name: "Pug / Jade",      source: () =>  pug({ iframeUrl: `iframeUrl` })},
+    { name: "ERB",             source: () => html({ iframeUrl: `"<%= @iframeUrl %>"` })},
     { name: "JSX",             source: () =>  jsx({ iframeUrl: `{iframeUrl}`,     mode: "ace/mode/jsx" })},
-    { name: "Pug/Jade",        source: () =>  pug({ iframeUrl: `iframeUrl` })},
 ];
 
 export const getSignTokenOptions = (params) => [
-    { name: "Node.js", source: () => node(params),    mode: "ace/mode/javascript" },
-    { name: "Ruby",    source: () => ruby(params),    mode: "ace/mode/ruby" },
-    { name: "Python",    source: () => python(params),    mode: "ace/mode/python" },
+    { name: "Node.js", source: () => node(params),    mode: "ace/mode/javascript", embedOption: "Pug / Jade" },
+    { name: "Ruby",    source: () => ruby(params),    mode: "ace/mode/ruby",       embedOption: "ERB" },
+    { name: "Python",  source: () => python(params),  mode: "ace/mode/python" },
     { name: "Clojure", source: () => clojure(params), mode: "ace/mode/clojure" },
 ];
 
@@ -88,7 +89,6 @@ token = jwt.encode(payload, METABASE_SECRET_KEY, algorithm="HS256")
 
 iframeUrl = METABASE_SITE_URL + "/embed/${resourceType}/" + token${optionsToHashParams(displayOptions) ? " + " + JSON.stringify(optionsToHashParams(displayOptions)) : "" }
 `;
-
 
 const clojure = ({ siteUrl, secretKey, resourceType, resourceId, params, displayOptions }) =>
 `(require '[buddy.sign.jwt :as jwt])

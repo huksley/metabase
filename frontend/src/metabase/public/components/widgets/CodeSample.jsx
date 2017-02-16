@@ -22,31 +22,40 @@ type State = {
 export default class CodeSample extends Component<*, Props, State> {
     state: State;
 
-    static defaultProps = {
-        className: "bordered rounded shadowed relative"
-    }
-
     constructor(props: Props) {
         super(props);
         this.state = {
             name: Array.isArray(props.options) && props.options.length > 0 ? props.options[0].name : null
         };
     }
+
+    setOption(name) {
+        this.setState({ name })
+    }
+
+    handleChange(name) {
+        const { options, onChangeOption } = this.props;
+        this.setState({ name });
+        if (onChangeOption) {
+            onChangeOption(_.findWhere(options, { name }))
+        }
+    }
+
     render() {
         const { className, title, options } = this.props;
         const { name } = this.state;
         const selected = _.findWhere(options, { name });
         const source = selected && selected.source()
         return (
-            <div>
+            <div className={className}>
                 { (title || (options && options.length > 1)) &&
-                    <div className="mt2 flex align-center">
+                    <div className="flex align-center">
                         <h4>{title}</h4>
                         { options && options.length > 1 ?
                             <Select
                                 className="AdminSelect--borderless ml-auto pt1 pb1"
                                 value={name}
-                                onChange={(e) => this.setState({ name: e.target.value })}
+                                onChange={(e) => this.handleChange(e.target.value)}
                             >
                                 { options.map(option =>
                                     <Option value={option.name}>{option.name}</Option>
@@ -55,7 +64,7 @@ export default class CodeSample extends Component<*, Props, State> {
                         : null }
                     </div>
                 }
-                <div className={className}>
+                <div className="bordered rounded shadowed relative">
                     <AceEditor
                         className="z1"
                         value={source}

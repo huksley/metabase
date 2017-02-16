@@ -157,7 +157,7 @@ export default class EmbedModalContent extends Component<*, Props, State> {
                         onClick={onClose}
                     />
                 </div>
-                <div className="flex flex-full my4">
+                <div className="flex flex-full">
                     <div className="flex-full ml-auto mr-auto" style={{ maxWidth: 1040 }}>
                         { embedType == null ?
                             <SharingPane

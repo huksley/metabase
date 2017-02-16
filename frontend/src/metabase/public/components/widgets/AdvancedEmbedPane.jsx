@@ -64,12 +64,17 @@ const AdvancedEmbedPane = ({
     onSave
 }: Props) =>
     <div className="full flex flex-column">
-        { !resource.enable_embedding || !_.isEqual(resource.embedding_params, embeddingParams) &&
+        { !resource.enable_embedding || !_.isEqual(resource.embedding_params, embeddingParams) ?
             <div className="mb2 p2 bordered rounded flex align-center">
-                <div>You’ve made changes that need to be published before they will be reflected in your application embed.</div>
+                <div>
+                    { resource.enable_embedding ?
+                        `You’ve made changes that need to be published before they will be reflected in your application embed.` :
+                        `You will need to publish this ${resourceType} before you can embed it in another application.`
+                    }
+                </div>
                 <ActionButton success medium className="ml-auto" actionFn={onSave} activeText="Updating..." successText="Updated" failedText="Failed!">Publish</ActionButton>
             </div>
-        }
+        : null }
         <ToggleLarge
             className="mb2"
             style={{ width: 244, height: 34 }}
