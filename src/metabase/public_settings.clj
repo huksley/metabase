@@ -22,9 +22,9 @@
   "The name used for this instance of Metabase."
   :default "Metabase")
 
+;; This value is *guaranteed* to never have a trailing slash :D
 (defsetting -site-url
-  "The base URL of this Metabase instance, e.g. \"http://metabase.my-company.com\".
-   This is *guaranteed* never to have a tailing slash."
+  "The base URL of this Metabase instance, e.g. \"http://metabase.my-company.com\"."
   :setter (fn [new-value]
             (setting/set-string! :-site-url (when new-value
                                               (s/replace new-value #"/$" "")))))
