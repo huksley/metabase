@@ -15,8 +15,12 @@
                   :dashboard <dashboard-id>}
        :params   <params>}"
   ;; TODO - switch resource.question back to resource.card
-  (:require [clojure.tools.logging :as log]
+  (:require (clojure [set :as set]
+                     [string :as str])
+            [clojure.tools.logging :as log]
             [compojure.core :refer [GET]]
+            [medley.core :as m]
+            [schema.core :as s]
             [toucan.db :as db]
             (metabase.api [common :as api]
                           [dataset :as dataset-api]
@@ -26,12 +30,13 @@
                              [dashboard-card :refer [DashboardCard]])
             [metabase.models.setting :as setting]
             [metabase.util :as u]
-            [metabase.util.embed :as eu]))
+            (metabase.util [embed :as eu]
+                           [schema :as su])))
 
 
 ;;; ------------------------------------------------------------ Setting & Util Fns ------------------------------------------------------------
 
-(defn- check-embedding-enabled
+(defn- check-embedding-enabled-for-object
   "Check that embedding is enabled, that OBJECT exists, and embedding for OBJECT is enabled."
   [object]
   (api/check-embedding-enabled)
@@ -40,16 +45,75 @@
     [400 "Embedding is not enabled for this object."]))
 
 (defn- check-embedding-enabled-for-dashboard [dashboard-id]
-  (check-embedding-enabled (db/select-one [Dashboard :enable_embedding] :id dashboard-id)))
+  (check-embedding-enabled-for-object (db/select-one [Dashboard :enable_embedding] :id dashboard-id)))
 
 (defn- check-embedding-enabled-for-card [card-id]
-  (check-embedding-enabled (db/select-one [Card :enable_embedding] :id card-id)))
+  (check-embedding-enabled-for-object (db/select-one [Card :enable_embedding] :id card-id)))
+
+
+;;; ------------------------------------------------------------ Param Checking ------------------------------------------------------------
+
+(defn- validate-params-are-allowed
+  "Check that the conditions specified by `object-embedding-params` are satisfied."
+  [object-embedding-params token-params user-params all-params]
+  (doseq [[param status] object-embedding-params]
+    (case status
+      ;; disabled means a param is not allowed to be specified by either token or user
+      "disabled" (api/check (not (contains? all-params param))
+                   [400 (format "You're not allowed to specify a value for %s." param)])
+      ;; enabled means JWT or user can specify the param, but it *must* be specified
+      "enabled"  (api/check (contains? all-params param)
+                   [400 (format "You must specify a value for %s." param)])
+      ;; locked means JWT must specify param
+      "locked"   (api/check
+                     (contains? token-params param)      [400 (format "You must specify a value for %s in the JWT." param)]
+                     (not (contains? user-params param)) [400 (format "You can only specify a value for %s in the JWT." param)]))))
+
+(defn- validate-params-exist
+  "Make sure all the params specified are specified in `object-embedding-params`."
+  [object-embedding-params all-params]
+  (let [embedding-params (set (keys object-embedding-params))]
+    (doseq [k all-params]
+      (api/check (contains? embedding-params k)
+        [400 (format "Unknown parameter %s." k)]))))
+
+(defn- validate-param-sets
+  "Validate that sets of params passed as part of the JWT token and by the user (as query params, i.e. as part of the URL)
+   are valid for the OBJECT-EMBEDDING-PARAMS. TOKEN-PARAMS and USER-PARAMS should be sets of all valid param keys specified in
+   the JWT or by the user, respectively."
+  [object-embedding-params token-params user-params]
+  ;; TODO - maybe make this log/debug once embedding is wrapped up
+  (log/info "Validating params for embedded object:\n"
+            "object embedding params:" object-embedding-params
+            "token params:"            token-params
+            "user params:"             user-params)
+  (let [all-params (set/union token-params user-params)]
+    (validate-params-are-allowed object-embedding-params token-params user-params all-params)
+    (validate-params-exist object-embedding-params all-params)))
+
+(defn- valid-param?
+  "Is V a valid param value? (Is it non-`nil`, and, if a String, non-blank?)"
+  [v]
+  (and (not (nil? v))
+       (or (not (string? v))
+           (not (str/blank? v)))))
+
+(s/defn ^:always-validate validate-params
+  "Validate that the TOKEN-PARAMS passed in the JWT and the USER-PARAMS (passed as part of the URL) are allowed, and that ones that
+   are required are specified by checking them against a Card or Dashboard's OBJECT-EMBEDDING-PARAMS (the object's value of
+   `:embedding_params`). Throws a 400 if any of the checks fail. If all checks are successful, returns a merged parameters map."
+  [object-embedding-params :- su/EmbeddingParams, token-params user-params]
+  (validate-param-sets object-embedding-params
+                       (set (keys (m/filter-vals valid-param? token-params)))
+                       (set (keys (m/filter-vals valid-param? user-params))))
+  ;; ok, everything checks out, now return the merged params map
+  (merge user-params token-params))
 
 
 ;;; ------------------------------------------------------------ Param Util Fns ------------------------------------------------------------
 
 (defn remove-token-parameters
-  "Removes any parameters with slugs matching keys provided in token-params, as these should not be exposed to the user."
+  "Removes any parameters with slugs matching keys provided in TOKEN-PARAMS, as these should not be exposed to the user."
   [dashboard-or-card token-params]
   (update dashboard-or-card :parameters (partial remove (comp (partial contains? token-params) keyword :slug)))) ; grab :slug, convert to kw, remove if in token-params
 
@@ -128,7 +192,7 @@
   (let [card-id          (eu/get-in-unsigned-token-or-throw unsigned-token [:resource :question])
         token-params     (eu/get-in-unsigned-token-or-throw unsigned-token [:params])
         ;; TODO - validate required signed parameters are present in token-params
-        parameter-values (merge query-params token-params)
+        parameter-values (validate-params (db/select-one-field :embedding_params Card :id card-id) token-params query-params)
         parameters       (apply-parameter-values (resolve-card-parameters card-id) parameter-values)]
     (check-embedding-enabled-for-card card-id)
     (apply public-api/run-query-for-card-with-id card-id parameters options)))
@@ -170,7 +234,7 @@
         id           (eu/get-in-unsigned-token-or-throw unsigned [:resource :dashboard])
         token-params (eu/get-in-unsigned-token-or-throw unsigned [:params])]
     (check-embedding-enabled-for-dashboard id)
-    ;; TODO - enforce params whitelist for dashboard
+    ;; TODO - do we need to do anything to enforce the params whitelist for dashboard?
     (-> (public-api/public-dashboard :id id, :enable_embedding true)
         (remove-token-parameters token-params))))
 
@@ -189,7 +253,7 @@
         dashboard-id     (eu/get-in-unsigned-token-or-throw unsigned-token [:resource :dashboard])
         token-params     (eu/get-in-unsigned-token-or-throw unsigned-token [:params])
         ;; TODO: validate required signed parameters are present in token-params (once that is configurable by the admin)
-        parameter-values (merge query-params token-params)
+        parameter-values (validate-params (db/select-one-field :embedding_params Dashboard :id dashboard-id) token-params query-params)
         parameters       (apply-parameter-values (resolve-dashboard-parameters dashboard-id dashcard-id card-id) parameter-values)]
     (check-embedding-enabled-for-dashboard dashboard-id)
     (public-api/public-dashcard-results dashboard-id card-id parameters)))
