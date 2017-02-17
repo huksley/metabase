@@ -25,6 +25,8 @@ const html = ({ iframeUrl }) =>
 `<iframe
     src=${iframeUrl}
     frameborder="0"
+    width=800
+    height=600
     allowtransparency
 />`
 
@@ -32,6 +34,8 @@ const jsx = ({ iframeUrl }) =>
 `<iframe
     src=${iframeUrl}
     frameBorder={0}
+    width=800
+    height=600
     allowTransparency
 />`
 
@@ -39,11 +43,14 @@ const pug = ({ iframeUrl }) =>
 `iframe(
     src=${iframeUrl}
     frameborder="0"
+    width=800
+    height=600
     allowtransparency
 )`
 
 const node = ({ siteUrl, secretKey, resourceType, resourceId, params, displayOptions }) =>
-`var jwt = require("jsonwebtoken");
+`//you will need to install via 'npm install jsonwebtoken' or your build system first
+var jwt = require("jsonwebtoken");
 
 var METABASE_SITE_URL = ${JSON.stringify(siteUrl)};
 var METABASE_SECRET_KEY = ${JSON.stringify(secretKey)};
@@ -57,7 +64,8 @@ var token = jwt.sign(payload, METABASE_SECRET_KEY);
 var iframeUrl = METABASE_SITE_URL + "/embed/${resourceType}/" + token${optionsToHashParams(displayOptions) ? " + " + JSON.stringify(optionsToHashParams(displayOptions)) : "" };`;
 
 const ruby = ({ siteUrl, secretKey, resourceType, resourceId, params, displayOptions }) =>
-`require 'jwt'
+`# you will need to install 'jwt' gem first via 'gem install jwt' or in your project Gemfile
+require 'jwt'
 
 METABASE_SITE_URL = ${JSON.stringify(siteUrl)}
 METABASE_SECRET_KEY = ${JSON.stringify(secretKey)}
@@ -74,7 +82,8 @@ iframeUrl = METABASE_SITE_URL + "/embed/${resourceType}/" + token${optionsToHash
 `;
 
 const python = ({ siteUrl, secretKey, resourceType, resourceId, params, displayOptions }) =>
-`import jwt
+`# You'll need to install PyJWT via pip 'pip install PyJWT' or your project packages file
+import jwt
 
 METABASE_SITE_URL = ${JSON.stringify(siteUrl)}
 METABASE_SECRET_KEY = ${JSON.stringify(secretKey)}

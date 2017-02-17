@@ -123,7 +123,7 @@ export default class SharingPane extends Component<*, Props, State> {
                         />
                         <div className="ml2 flex-full">
                             <h3 className="text-purple mb1">Embed this {resourceType} in an application</h3>
-                            <div className="">Embed this {resourceType} in your application. By integrating with your application server code, you can provide secure per-user stats {resourceType}, .</div>
+                            <div className="">Embed this {resourceType} in your application. By integrating with your application server code, you can provide secure stats {resourceType} limited to a specific user, organization, etc .</div>
                         </div>
                     </div>
                 }
