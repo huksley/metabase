@@ -122,6 +122,5 @@
 
 (def EmbeddingParams
   "Schema for a valid map of embedding params."
-  (with-api-error-message (s/named {s/Keyword (s/enum "disabled" "enabled" "locked")}
-                                   "valid embedding params map")
+  (with-api-error-message (s/maybe {s/Keyword (s/enum "disabled" "enabled" "locked")})
     "value must be a valid embedding params map."))

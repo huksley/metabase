@@ -81,6 +81,7 @@ export default class SharingPane extends Component<*, Props, State> {
                     </div>
                     <div className="ml2 flex-full">
                         <h3 className="text-brand mb1">Public link</h3>
+                        <div className="mb1">Share this {resourceType} with people who don't have a Metabase account using the below url:</div>
                         <CopyWidget value={publicLink} />
                         { extensions && extensions.length > 0 &&
                             <div className="mt1">
@@ -105,8 +106,8 @@ export default class SharingPane extends Component<*, Props, State> {
                         forceOriginalDimensions={false}
                     />
                     <div className="ml2 flex-full">
-                        <h3 className="text-green mb1">Embed</h3>
-                        <div className="mb1">Embed this {resourceType} in blog posts or web pages.</div>
+                        <h3 className="text-green mb1">Public Embed</h3>
+                        <div className="mb1">Embed this {resourceType} in blog posts or web pages by copying+pasting the below snippet.</div>
                         <CopyWidget value={iframeSource} />
                     </div>
                 </div>
@@ -121,8 +122,8 @@ export default class SharingPane extends Component<*, Props, State> {
                             forceOriginalDimensions={false}
                         />
                         <div className="ml2 flex-full">
-                            <h3 className="text-purple mb1">Application Embed</h3>
-                            <div className="">Embed this {resourceType} in your app and let your server provide parameter values and security.</div>
+                            <h3 className="text-purple mb1">Embed this {resourceType} in an application</h3>
+                            <div className="">Embed this {resourceType} in your application. By integrating with your application server code, you can provide secure stats {resourceType} limited to a specific user, organization, etc .</div>
                         </div>
                     </div>
                 }

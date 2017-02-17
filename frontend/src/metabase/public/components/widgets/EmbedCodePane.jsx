@@ -39,8 +39,9 @@ export default class EmbedCodePane extends Component<*, Props, *> {
             <div className={className}>
                 { embedType === "application" ?
                     <div key="application">
+                    <p>To embed this {resourceType} in your application:</p>
                         <CodeSample
-                            title="Server-side Token Signing"
+                            title="Insert this code snippet in your server code to generate the signed embedding URL "
                             options={getSignTokenOptions({ siteUrl, secretKey, resourceType, resourceId: resource.id, params, displayOptions })}
                             onChangeOption={(option) => {
                                 if (option && option.embedOption && this._embedSample && this._embedSample.setOption) {
@@ -51,21 +52,21 @@ export default class EmbedCodePane extends Component<*, Props, *> {
                         <CodeSample
                             className="mt2"
                             ref={embedSample => this._embedSample = embedSample}
-                            title="Embed Code"
+                            title="Then insert this code snippet in your HTML template or single page app."
                             options={getSignedEmbedOptions({ iframeUrl })}
                         />
                     </div>
                 :
                     <div key="public">
                         <CodeSample
-                            title="Embed Code"
+                            title="Embed code snippet for your HTML or Frontend Application"
                             options={getPublicEmbedOptions({ iframeUrl })}
                         />
                     </div>
                 }
 
                 <div className="text-centered my2">
-                    <h4>More <ExternalLink href="https://github.com/metabase/metabase">examples on GitHub</ExternalLink></h4>
+                    <h4>More <ExternalLink href="https://github.com/metabase/embedding_reference_apps">examples on GitHub</ExternalLink></h4>
                 </div>
             </div>
         );
