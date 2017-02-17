@@ -186,7 +186,7 @@
    an EMBEDDING-PARAMS whitelist, and additional query OPTIONS."
   {:style/indent 0}
   [& {:keys [card-id embedding-params token-params query-params options]}]
-  {:pre [(integer? card-id) (map? embedding-params) (map? token-params) (map? query-params)]}
+  {:pre [(integer? card-id) (u/maybe? map? embedding-params) (map? token-params) (map? query-params)]}
   (let [parameter-values (validate-params embedding-params token-params query-params)
         parameters       (apply-parameter-values (resolve-card-parameters card-id) parameter-values)]
     (apply public-api/run-query-for-card-with-id card-id parameters options)))
@@ -208,7 +208,7 @@
   "Return results for running the query belonging to a DashboardCard."
   {:style/indent 0}
   [& {:keys [dashboard-id dashcard-id card-id embedding-params token-params query-params]}]
-  {:pre [(integer? dashboard-id) (integer? dashcard-id) (integer? card-id) (map? embedding-params) (map? token-params) (map? query-params)]}
+  {:pre [(integer? dashboard-id) (integer? dashcard-id) (integer? card-id) (u/maybe? map? embedding-params) (map? token-params) (map? query-params)]}
   (let [parameter-values (validate-params embedding-params token-params query-params)
         parameters       (apply-parameter-values (resolve-dashboard-parameters dashboard-id dashcard-id card-id) parameter-values)]
     (public-api/public-dashcard-results dashboard-id card-id parameters)))
