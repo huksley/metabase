@@ -101,6 +101,9 @@ export class WindowModal extends Component {
     }
 }
 
+import routeless from "metabase/hoc/Routeless";
+
+@routeless
 export class FullPageModal extends Component {
     static childContextTypes = MODAL_CHILD_CONTEXT_TYPES;
 
