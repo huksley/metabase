@@ -13,6 +13,8 @@ import {
 } from "./components/widgets/PublicLinksListing.jsx";
 import SecretKeyWidget from "./components/widgets/SecretKeyWidget.jsx";
 
+import { UtilApi } from "metabase/services";
+
 const SECTIONS = [
     {
         name: "Setup",
@@ -200,7 +202,14 @@ const SECTIONS = [
             {
                 key: "enable-embedding",
                 display_name: "Enable Embedding Metabase in other Applications",
-                type: "boolean"
+                type: "boolean",
+                onChanged: async (oldValue, newValue, settingsValues, onChange) => {
+                    console.log(oldValue, newValue, settingsValues["embedding-secret-key"])
+                    if (!oldValue && newValue && !settingsValues["embedding-secret-key"]) {
+                        let result = await UtilApi.random_token();
+                        await onChange("embedding-secret-key", result.token);
+                    }
+                }
             },
             {
                 key: "embedding-secret-key",

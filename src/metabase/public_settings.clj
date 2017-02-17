@@ -61,7 +61,7 @@
   :default false)
 
 (defsetting enable-embedding
-  "Allow admins to securely embed cards and dashboards within other applications?"
+  "Allow admins to securely embed questions and dashboards within other applications?"
   :type    :boolean
   :default false)
 

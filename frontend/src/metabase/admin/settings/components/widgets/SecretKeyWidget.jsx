@@ -4,6 +4,7 @@ import React, { Component, PropTypes } from "react";
 
 import SettingInput from "./SettingInput";
 import Button from "metabase/components/Button";
+import Confirm from "metabase/components/Confirm";
 
 import { UtilApi } from "metabase/services";
 
@@ -26,7 +27,17 @@ export default class SecretKeyWidget extends Component<*, Props, *> {
         return (
             <div className="flex align-center">
                 <SettingInput {...this.props} />
-                <Button className="ml1" primary medium onClick={this._generateToken}>{setting.value ? "Regenerate" : "Regenerate"} Token</Button>
+                { setting.value ?
+                    <Confirm
+                        title="Generate a new key?"
+                        ontent="This will cause existing embeds to stop working until they are updated with the new key."
+                        action={this._generateToken}
+                    >
+                        <Button className="ml1" primary medium>Regenerate Key</Button>
+                    </Confirm>
+                :
+                    <Button className="ml1" primary medium onClick={this._generateToken}>Generate Key</Button>
+                }
             </div>
         );
     }
