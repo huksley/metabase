@@ -55,19 +55,21 @@
 
 (defn- validate-params-are-allowed
   "Check that the conditions specified by `object-embedding-params` are satisfied."
-  [object-embedding-params token-params user-params all-params]
-  (doseq [[param status] object-embedding-params]
-    (case status
-      ;; disabled means a param is not allowed to be specified by either token or user
-      "disabled" (api/check (not (contains? all-params param))
-                   [400 (format "You're not allowed to specify a value for %s." param)])
-      ;; enabled means JWT or user can specify the param, but it *must* be specified
-      "enabled"  (api/check (contains? all-params param)
-                   [400 (format "You must specify a value for %s." param)])
-      ;; locked means JWT must specify param
-      "locked"   (api/check
-                     (contains? token-params param)      [400 (format "You must specify a value for %s in the JWT." param)]
-                     (not (contains? user-params param)) [400 (format "You can only specify a value for %s in the JWT." param)]))))
+  [object-embedding-params token-params user-params]
+  (let [all-params        (set/union token-params user-params)
+        duplicated-params (set/intersection token-params user-params)]
+    (doseq [[param status] object-embedding-params]
+      (case status
+        ;; disabled means a param is not allowed to be specified by either token or user
+        "disabled" (api/check (not (contains? all-params param))
+                     [400 (format "You're not allowed to specify a value for %s." param)])
+        ;; enabled means either JWT *or* user can specify the param, but not both. Param is *not* required
+        "enabled"  (api/check (not (contains? duplicated-params param))
+                     [400 (format "You can't specify a value for %s if it's already set in the JWT." param)])
+        ;; locked means JWT must specify param
+        "locked"   (api/check
+                       (contains? token-params param)      [400 (format "You must specify a value for %s in the JWT." param)]
+                       (not (contains? user-params param)) [400 (format "You can only specify a value for %s in the JWT." param)])))))
 
 (defn- validate-params-exist
   "Make sure all the params specified are specified in `object-embedding-params`."
@@ -87,9 +89,8 @@
             "object embedding params:" object-embedding-params
             "token params:"            token-params
             "user params:"             user-params)
-  (let [all-params (set/union token-params user-params)]
-    (validate-params-are-allowed object-embedding-params token-params user-params all-params)
-    (validate-params-exist object-embedding-params all-params)))
+  (validate-params-are-allowed object-embedding-params token-params user-params)
+  (validate-params-exist object-embedding-params (set/union token-params user-params)))
 
 (defn- valid-param?
   "Is V a valid param value? (Is it non-`nil`, and, if a String, non-blank?)"
