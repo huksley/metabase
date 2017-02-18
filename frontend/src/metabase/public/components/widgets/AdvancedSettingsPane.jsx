@@ -99,7 +99,7 @@ const AdvancedSettingsPane = ({
         { resource.enable_embedding ?
             <Section title="Danger zone">
                 <p>This will disable embedding for this {resourceType}.</p>
-                <Button medium warning onClick={onUnpublish}>Unpublissh</Button>
+                <Button medium warning onClick={onUnpublish}>Unpublish</Button>
             </Section>
         : null }
     </div>
