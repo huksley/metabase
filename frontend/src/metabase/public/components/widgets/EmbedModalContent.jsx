@@ -4,12 +4,10 @@ import React, { Component, PropTypes } from "react";
 import { connect } from "react-redux";
 import { titleize } from "inflection";
 
-import SimpleEmbedPane from "./SimpleEmbedPane";
-import AdvancedEmbedPane from "./AdvancedEmbedPane";
-
 import Icon from "metabase/components/Icon";
 
 import SharingPane from "./SharingPane";
+import AdvancedEmbedPane from "./AdvancedEmbedPane";
 
 import { getSignedPreviewUrl, getUnsignedPreviewUrl, getSignedToken } from "metabase/public/lib/embed";
 
@@ -108,6 +106,15 @@ export default class EmbedModalContent extends Component<*, Props, State> {
         }
     }
 
+    handleUnpublish = async () => {
+        await this.props.onUpdateEnableEmbedding(false);
+    }
+
+    handleDiscard = () => {
+        const { resource } = this.props;
+        this.setState({ embeddingParams: resource.embedding_params || {} });
+    }
+
     getPreviewParams() {
         const { resourceParameters } = this.props;
         const { embeddingParams, parameterValues } = this.state;
@@ -142,8 +149,8 @@ export default class EmbedModalContent extends Component<*, Props, State> {
         const previewParameters = resourceParameters.filter(p => embeddingParams[p.slug] === "locked");
 
         return (
-            <div className="p4 flex flex-column full-height">
-                <div className="flex align-center mb2">
+            <div className="flex flex-column full-height">
+                <div className="px2 py1 z1 flex align-center" style={{ boxShadow: embedType === "application" ? "0px 8px 15px -9px rgba(0,0,0,0.2)" : undefined }}>
                     <h2 className="ml-auto">
                         <EmbedTitle
                             onClick={() => this.setState({ embedType: null })}
@@ -158,44 +165,40 @@ export default class EmbedModalContent extends Component<*, Props, State> {
                     />
                 </div>
                 <div className="flex flex-full">
-                    <div className="flex-full ml-auto mr-auto" style={{ maxWidth: 1040 }}>
-                        { embedType == null ?
+                    { embedType == null ?
+                        <div className="flex-full ml-auto mr-auto" style={{ maxWidth: 1040 }}>
                             <SharingPane
                                 {...this.props}
                                 publicUrl={iframeUrl}
                                 iframeUrl={iframeUrl}
                                 onChangeEmbedType={(embedType) => this.setState({ embedType })}
                             />
-                        : embedType === "simple" ?
-                            <SimpleEmbedPane
-                                iframeUrl={iframeUrl}
-                                displayOptions={displayOptions}
-                                onChangeDisplayOptions={(displayOptions) => this.setState({ displayOptions })}
-                            />
-                        : embedType === "application" ?
-                            <AdvancedEmbedPane
-                                pane={pane}
-                                resource={resource}
-                                resourceType={resourceType}
-                                embedType={embedType}
-                                token={token}
-                                iframeUrl={iframeUrl}
-                                siteUrl={siteUrl}
-                                secretKey={secretKey}
-                                params={params}
-                                displayOptions={displayOptions}
-                                previewParameters={previewParameters}
-                                parameterValues={parameterValues}
-                                resourceParameters={resourceParameters}
-                                embeddingParams={embeddingParams}
-                                onChangeDisplayOptions={(displayOptions) => this.setState({ displayOptions })}
-                                onChangeEmbeddingParameters={(embeddingParams) => this.setState({ embeddingParams })}
-                                onChangeParameterValue={(id, value) => this.setState({ parameterValues: { ...parameterValues, [id]: value }})}
-                                onChangePane={(pane) => this.setState({ pane })}
-                                onSave={this.handleSave}
-                            />
-                    : null }
-                    </div>
+                        </div>
+                    : embedType === "application" ?
+                        <AdvancedEmbedPane
+                            pane={pane}
+                            resource={resource}
+                            resourceType={resourceType}
+                            embedType={embedType}
+                            token={token}
+                            iframeUrl={iframeUrl}
+                            siteUrl={siteUrl}
+                            secretKey={secretKey}
+                            params={params}
+                            displayOptions={displayOptions}
+                            previewParameters={previewParameters}
+                            parameterValues={parameterValues}
+                            resourceParameters={resourceParameters}
+                            embeddingParams={embeddingParams}
+                            onChangeDisplayOptions={(displayOptions) => this.setState({ displayOptions })}
+                            onChangeEmbeddingParameters={(embeddingParams) => this.setState({ embeddingParams })}
+                            onChangeParameterValue={(id, value) => this.setState({ parameterValues: { ...parameterValues, [id]: value }})}
+                            onChangePane={(pane) => this.setState({ pane })}
+                            onSave={this.handleSave}
+                            onUnpublish={this.handleUnpublish}
+                            onDiscard={this.handleDiscard}
+                        />
+                : null }
                 </div>
             </div>
         );

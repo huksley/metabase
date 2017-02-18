@@ -17,7 +17,7 @@ const EmbedSelect = ({ className, value, onChange, options }: Props) =>
     <div className={cx(className, "flex")}>
         { options.map(option =>
             <div
-                className={cx("flex-full flex layout-centered mx1 p1 border-bottom border-med", {
+                className={cx("flex-full flex layout-centered mx1 p1 border-bottom border-med border-dark-hover", {
                     "border-dark": value === option.value,
                     "cursor-pointer": value !== option.value
                 })}

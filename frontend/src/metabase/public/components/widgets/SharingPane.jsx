@@ -60,7 +60,7 @@ export default class SharingPane extends Component<*, Props, State> {
         const iframeSource = getPublicEmbedHTML(getPublicUrl(resource));
 
         return (
-            <div className="ml-auto mr-auto" style={{ maxWidth: 600 }}>
+            <div className="pt2 ml-auto mr-auto" style={{ maxWidth: 600 }}>
                 { isAdmin && isPublicSharingEnabled &&
                     <div className="pb2 mb4 border-bottom flex align-center">
                         <h4>Enable sharing</h4>

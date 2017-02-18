@@ -584,11 +584,11 @@ const dashboards = handleActions({
     [DELETE_PUBLIC_LINK]: { next: (state, { payload }) =>
         assocIn(state, [payload.id, "public_uuid"], null)
     },
-    [UPDATE_ENABLE_EMBEDDING]: { next: (state, { payload }) =>
-        assocIn(state, [payload.id, "embedding_params"], payload.uuid)
-    },
     [UPDATE_EMBEDDING_PARAMS]: { next: (state, { payload }) =>
-        assocIn(state, [payload.id, "enable_embedding"], null)
+        assocIn(state, [payload.id, "embedding_params"], payload.embedding_params)
+    },
+    [UPDATE_ENABLE_EMBEDDING]: { next: (state, { payload }) =>
+        assocIn(state, [payload.id, "enable_embedding"], payload.enable_embedding)
     },
 }, {});
 

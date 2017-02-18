@@ -6,10 +6,10 @@ export const getPublicEmbedOptions = ({ iframeUrl }) => [
 ];
 
 export const getSignedEmbedOptions = () => [
-    { name: "HTML (Mustache)", source: () => html({ iframeUrl: `"{{iframeUrl}}"`, mode: "ace/mode/html" })},
-    { name: "Pug / Jade",      source: () =>  pug({ iframeUrl: `iframeUrl` })},
-    { name: "ERB",             source: () => html({ iframeUrl: `"<%= @iframeUrl %>"` })},
-    { name: "JSX",             source: () =>  jsx({ iframeUrl: `{iframeUrl}`,     mode: "ace/mode/jsx" })},
+    { name: "Mustache",   source: () => html({ iframeUrl: `"{{iframeUrl}}"`, mode: "ace/mode/html" })},
+    { name: "Pug / Jade", source: () =>  pug({ iframeUrl: `iframeUrl` })},
+    { name: "ERB",        source: () => html({ iframeUrl: `"<%= @iframe_url %>"` })},
+    { name: "JSX",        source: () =>  jsx({ iframeUrl: `{iframeUrl}`,     mode: "ace/mode/jsx" })},
 ];
 
 export const getSignTokenOptions = (params) => [
@@ -25,8 +25,8 @@ const html = ({ iframeUrl }) =>
 `<iframe
     src=${iframeUrl}
     frameborder="0"
-    width=800
-    height=600
+    width="800"
+    height="600"
     allowtransparency
 />`
 
@@ -34,8 +34,8 @@ const jsx = ({ iframeUrl }) =>
 `<iframe
     src=${iframeUrl}
     frameBorder={0}
-    width=800
-    height=600
+    width={800}
+    height={600}
     allowTransparency
 />`
 
@@ -43,13 +43,14 @@ const pug = ({ iframeUrl }) =>
 `iframe(
     src=${iframeUrl}
     frameborder="0"
-    width=800
-    height=600
+    width="800"
+    height="600"
     allowtransparency
 )`
 
 const node = ({ siteUrl, secretKey, resourceType, resourceId, params, displayOptions }) =>
-`//you will need to install via 'npm install jsonwebtoken' or your build system first
+`// you will need to install via 'npm install jsonwebtoken' or in your package.json
+
 var jwt = require("jsonwebtoken");
 
 var METABASE_SITE_URL = ${JSON.stringify(siteUrl)};
@@ -65,6 +66,7 @@ var iframeUrl = METABASE_SITE_URL + "/embed/${resourceType}/" + token${optionsTo
 
 const ruby = ({ siteUrl, secretKey, resourceType, resourceId, params, displayOptions }) =>
 `# you will need to install 'jwt' gem first via 'gem install jwt' or in your project Gemfile
+
 require 'jwt'
 
 METABASE_SITE_URL = ${JSON.stringify(siteUrl)}
@@ -78,11 +80,11 @@ payload = {
 }
 token = JWT.encode payload, METABASE_SECRET_KEY
 
-iframeUrl = METABASE_SITE_URL + "/embed/${resourceType}/" + token${optionsToHashParams(displayOptions) ? " + " + JSON.stringify(optionsToHashParams(displayOptions)) : "" }
-`;
+iframe_url = METABASE_SITE_URL + "/embed/${resourceType}/" + token${optionsToHashParams(displayOptions) ? " + " + JSON.stringify(optionsToHashParams(displayOptions)) : "" }`;
 
 const python = ({ siteUrl, secretKey, resourceType, resourceId, params, displayOptions }) =>
 `# You'll need to install PyJWT via pip 'pip install PyJWT' or your project packages file
+
 import jwt
 
 METABASE_SITE_URL = ${JSON.stringify(siteUrl)}
@@ -96,8 +98,7 @@ payload = {
 }
 token = jwt.encode(payload, METABASE_SECRET_KEY, algorithm="HS256")
 
-iframeUrl = METABASE_SITE_URL + "/embed/${resourceType}/" + token${optionsToHashParams(displayOptions) ? " + " + JSON.stringify(optionsToHashParams(displayOptions)) : "" }
-`;
+iframeUrl = METABASE_SITE_URL + "/embed/${resourceType}/" + token${optionsToHashParams(displayOptions) ? " + " + JSON.stringify(optionsToHashParams(displayOptions)) : "" }`;
 
 const clojure = ({ siteUrl, secretKey, resourceType, resourceId, params, displayOptions }) =>
 `(require '[buddy.sign.jwt :as jwt])
@@ -111,5 +112,4 @@ const clojure = ({ siteUrl, secretKey, resourceType, resourceId, params, display
 
 (def token (jwt/sign payload metabase-secret-key))
 
-(def iframe-url (str metabase-site-url "/embed/${resourceType}/" token${optionsToHashParams(displayOptions) ? (" " + JSON.stringify(optionsToHashParams(displayOptions))) : ""}))
-`;
+(def iframe-url (str metabase-site-url "/embed/${resourceType}/" token${optionsToHashParams(displayOptions) ? (" " + JSON.stringify(optionsToHashParams(displayOptions))) : ""}))`;

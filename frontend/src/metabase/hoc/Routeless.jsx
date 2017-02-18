@@ -1,4 +1,4 @@
-/* @flow */
+/* @flow weak */
 
 import React, { Component, PropTypes } from "react";
 
@@ -23,13 +23,15 @@ const mapDispatchToProps = {
 export default (ComposedComponent) => class extends Component {
     static displayName = "Routeless["+(ComposedComponent.displayName || ComposedComponent.name)+"]";
 
+    _state: any;
+
     componentWillMount() {
         const push = this.props._routeless_push;
         const location = this.props._routeless_location;
         const { pathname, query, search, hash, state } = location;
         // clone the state object otherwise the state will be replaced rather than pushed
         // save the state object so that we know when it's changed
-        this._state = Object.create(state);
+        this._state = typeof state === "object" ? Object.create(state) : {};
         push({ pathname, query, search, hash, state: this._state });
     }
 

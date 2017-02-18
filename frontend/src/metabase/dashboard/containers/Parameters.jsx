@@ -9,7 +9,8 @@ import cx from "classnames";
 
 export default class Parameters extends Component {
     defaultProps = {
-        syncQueryString: false
+        syncQueryString: false,
+        vertical: false,
     }
 
     componentWillMount() {
@@ -60,15 +61,17 @@ export default class Parameters extends Component {
             className,
             editingParameter, setEditingParameter,
             isEditing, isFullscreen, isNightMode, isQB,
-            setParameterName, setParameterValue, setParameterDefaultValue, removeParameter
+            setParameterName, setParameterValue, setParameterDefaultValue, removeParameter,
+            vertical
         } = this.props;
 
         const parameters = this._parametersWithValues();
 
         return (
-            <div className={cx(className, "flex flex-row align-end")}>
+            <div className={cx(className, "flex align-end", vertical ? "flex-column" : "flex-row")}>
                 { parameters.map(parameter =>
                     <ParameterWidget
+                        className={vertical ? "mb2" : null}
                         key={parameter.id}
 
                         isEditing={isEditing}
